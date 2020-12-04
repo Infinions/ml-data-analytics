@@ -1,7 +1,8 @@
-from flask import Flask, request,send_from_directory
+from flask import Flask, request
 from flask_cors import CORS
 import os
 import json
+from pandas import DataFrame
 
 import Data.load_data as load_data
 import Models.manipulation as data_manipulation
@@ -18,11 +19,62 @@ def sum_invoices_per_delta():
 
     data_costs = load_data.load_invoices_from_nif_costs(nif)
     data_earns = load_data.load_invoices_from_nif_earnings(nif)
-
     res1 = data_manipulation.invoices_sum_per_timedelta(data_costs, timedelta)
     res2 = data_manipulation.invoices_sum_per_timedelta(data_earns, timedelta)
 
-    json_data1 = res1.to_json(orient='values')
-    json_data2 = res2.to_json(orient='values')
+    json_data1 = res1.to_json(orient='records')
+    json_data2 = res2.to_json(orient='records')
 
     return {'costs': json_data1, 'earnings': json_data2}
+
+
+@app.route('/n_invoices_category', methods = ['GET'])
+def n_invoices_per_delta_per_category():
+    timedelta = request.args.get('delta')
+    nif = request.args.get('nif')
+    is_count = request.args.get('is_count')
+
+    data_costs = load_data.load_invoices_from_nif_costs(nif)
+    data_earns = load_data.load_invoices_from_nif_earnings(nif)
+
+    if data_costs.empty:
+        res1 = DataFrame()
+    else:
+        res1 = data_manipulation.n_invoices_per_category_per_delta(data_costs, timedelta, is_count)
+    
+    if data_earns.empty:
+        res2 = DataFrame()
+    else:
+        res2 = data_manipulation.n_invoices_per_category_per_delta(data_earns, timedelta, is_count)
+
+    json_data1 = res1.to_json(orient='records')
+    json_data2 = res2.to_json(orient='records')
+
+    return {'costs': json_data1, 'earnings': json_data2}
+
+
+@app.route('/n_invoices_client', methods = ['GET'])
+def n_invoices_per_delta_per_client():
+    timedelta = request.args.get('delta')
+    nif = request.args.get('nif')
+    is_count = request.args.get('is_count')
+
+    data_costs = load_data.load_invoices_from_nif_costs(nif)
+    data_earns = load_data.load_invoices_from_nif_earnings(nif)
+
+    if data_costs.empty:
+        res1 = DataFrame()
+    else:
+        res1 = data_manipulation.n_invoices_per_client_per_delta(data_costs, timedelta, is_count)
+    
+    if data_earns.empty:
+        res2 = DataFrame()
+    else:
+        res2 = data_manipulation.n_invoices_per_client_per_delta(data_earns, timedelta, is_count)
+
+    json_data1 = res1.to_json(orient='records')
+    json_data2 = res2.to_json(orient='records')
+
+    return {'costs': json_data1, 'earnings': json_data2}
+
+app.run(debug=True, port=5000)
