@@ -2,7 +2,11 @@ Flask==1.1.2
 numpy==1.19.4
 pandas==1.1.4
 pylint==2.6.0
-prophet==0.1.1.post1
 Flask-Cors==3.0.9
 psycopg2==2.8.6
 psycopg2-binary
+pystan==2.19.1
+fbprophet==0.7.1
+scikit-learn==0.23.2
+Keras==2.4.3
+jupyter==1.0.0

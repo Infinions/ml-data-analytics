@@ -5,7 +5,8 @@ import json
 from pandas import DataFrame
 
 import Data.load_data as load_data
-import Models.manipulation as data_manipulation
+import Models.statistics as data_manipulation
+import Models.predictions as predictor
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"*": {"origins": "*"}})
@@ -76,5 +77,28 @@ def n_invoices_per_delta_per_client():
     json_data2 = res2.to_json(orient='records')
 
     return {'costs': json_data1, 'earnings': json_data2}
+
+
+@app.route('/predict_invoices_simple', methods = ['GET'])
+def predict_invoices_simple():
+    timedelta = request.args.get('delta')
+    nif = request.args.get('nif')
+    time = request.args.get('window')
+
+    data_costs = load_data.load_invoices_from_nif_costs(nif)
+    data_earns = load_data.load_invoices_from_nif_earnings(nif)
+
+    if data_costs.empty:
+        res1 = DataFrame()
+    else:
+        res1 = predictor.forecast_growth_simple(data_costs, time, timedelta)
+    
+    if data_earns.empty:
+        res2 = DataFrame()
+    else:
+        res2 = predictor.forecast_growth_simple(data_earns, time, timedelta)
+
+    json_data1 = res1.to_json(orient='records')
+    json_data2 = res2.to_json(orient='records')
 
 app.run(debug=True, port=5000)
