@@ -10,3 +10,5 @@ fbprophet==0.7.1
 scikit-learn==0.23.2
 Keras==2.4.3
 jupyter==1.0.0
+graphene==2.1.8
+Flask-GraphQL==2.0.1

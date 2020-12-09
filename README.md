@@ -17,8 +17,55 @@ To exit the environment just run
 ```
 $ deactivate
 ```
+---
 
-## Supported Routes
+## Routing
+
+To process requests we decided to use a technology named __GraphQL__ using the __graphene__ package for python. With this we can perform fast query answers to this API returning only the data the user requests.
+
+To run, simply run
+```
+python api.py
+```
+
+and access the graphql interface on http://localhost:5000/graphql .
+
+### Available Querys
+
+#### Sum of invoices 
+```
+query {
+    sum_invoices(nif: "...", ...)
+}
+```
+- nif -> String, required;
+- delta -> String, optional (default "D")
+
+#### Invoices per category
+```
+query {
+    n_invoices_category(nif: "...", ...)
+}
+```
+- nif: String, required;
+- delta: String, optional (default "M");
+- is_count: Boolean, optional (default True);
+- category: String, optional (default None);
+
+#### Invoices per client
+```
+query {
+    n_invoices_client(nif: "...", ...)
+}
+```
+- nif: String, required;
+- delta: String, optional (default "M");
+- is_count: Boolean, optional (default True);
+- client_nif: String, optional (default None);
+
+---
+---
+---
 
 Delta explained
 ```
@@ -28,29 +75,3 @@ Y -> yearly data
 2BQS -> biannual data
 ```
 
-### Sum of invoices
-
-GET /sum_invoices
-```
-delta -> type of division for the time
-nif   -> nif from the company
-```
-
-
-### Number of invoices per category
-
-GET /n_invoices_category
-```
-delta -> type of division for the time
-nif   -> nif from the company
-is_count -> true if desires to receive countings instead of raw summings
-```
-
-### Number of invoices per client
-
-GET /n_invoices_client
-```
-delta -> type of division for the time
-nif   -> nif from the company
-is_count -> true if desires to receive countings instead of raw summings
-```

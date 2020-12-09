@@ -1,0 +1,64 @@
+query {
+    statistics(nif: "12345678", delta: "M") {
+        sum_invoices
+        ...
+    }
+}
+
+
+class Api_Args(graphene.ObjectType):
+    nif      = graphene.String()
+    delta    = graphene.String()
+    is_count = graphene.Boolean()
+
+    def resolve_nif(parent, info):
+        return f"{parent.nif}"
+
+    def resolve_delta(parent, info):
+        return f"{parent.delta}"
+
+    def resolve_is_count(parent, info):
+        return parent.is_count
+
+class Statistics(graphene.ObjectType):
+    sum_invoices = graphene.List()
+
+    def resolve_sum_invoices(parent, info):
+        #data_costs = load_data.load_invoices_from_nif_costs(nif)
+        print(nif)
+        print(delta)
+        data_costs = pd.read_csv('testing_datasets/accounts_payable_v2_complete_adapted.csv')
+        res1 = data_manipulation.invoices_sum_per_timedelta(data_costs, delta)
+        
+        return res1
+
+class Query(graphene.ObjectType):
+    sum_invoices = graphene.Field(
+        Statistics,
+        api_args = graphene.Field(
+            Api_Args, 
+            nif=graphene.String(required=True),
+            delta=graphene.String(required=True), 
+            is_count=graphene.Boolean()
+        )
+    )
+
+    def resolve_sum_invoices(parent, info, nif, delta, is_count):
+        return parent.sum_invoices()
+
+
+    
+class StatisticsType(ObjectType):
+    sum_invoices = JSONString(
+        data=String(),
+        delta=String()
+    )
+
+    def resolve_sum_invoices(parent, info, data, delta):
+        #data_costs = load_data.load_invoices_from_nif_costs(nif)
+        data_conv = pd.read_json(orient=export_type)
+        print(delta)
+        print(data_conv.head())
+        res1 = data_manipulation.invoices_sum_per_timedelta(data_conv, delta)
+        
+        return res1.to_json(orient=export_type)

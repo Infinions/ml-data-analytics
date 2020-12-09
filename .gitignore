@@ -28,7 +28,6 @@ node_modules
 .#*
 .coverage
 .pytest_cache
-src
 
 *.swp
 *.map
