@@ -38,11 +38,9 @@ class RootQuery(ObjectType):
         if client_nif == "":
             client_nif = None
         data_costs = load_data.load_invoices_from_nif_costs(nif)
-        #data_earns = load_data.load_invoices_from_nif_earnings(nif)
 
         res1 = data_manipulation.invoices_per_client_per_delta(data_costs, delta, client_nif, is_count)
-        #res2 = data_manipulation.invoices_per_client_per_delta(data_earns, delta, client_nif, is_count)
-
+        res1['date'] = res1['date'].dt.strftime('%Y-%m-%d')
 
         res1 = res1.to_json(orient=export_type)
         return res1
@@ -54,18 +52,16 @@ class RootQuery(ObjectType):
             category = None
         
         data_costs = load_data.load_invoices_from_nif_costs(nif)
-        data_earns = load_data.load_invoices_from_nif_earnings(nif)
 
         res1 = data_manipulation.invoices_per_category_per_delta(data_costs, delta, category, is_count)
-        res2 = data_manipulation.invoices_per_category_per_delta(data_earns, delta, category, is_count)
-
+        res1['date'] = res1['date'].dt.strftime('%Y-%m-%d')
         res1 = res1.to_json(orient=export_type)
         return res1
 
     @staticmethod
     def resolve_sum_invoices(parent, info, nif, delta):
         data_costs = load_data.load_invoices_from_nif_costs(nif)
-        data_earns = load_data.load_invoices_from_nif_earnings(nif)
+        data_earns = load_data.load_invoices_from_nif_incomes(nif)
 
         res1 = data_manipulation.invoices_sum_per_timedelta(data_costs, delta)
         res1.columns = ['dates','values']

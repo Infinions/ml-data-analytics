@@ -18,24 +18,22 @@ def load_invoices_from_nif_costs(nif):
                 WHERE cn.nif='"+nif+"'"
 
     dataframe = psql.read_sql(query, connection)
-    pd.set_option('display.expand_frame_repr', False)
     dataframe.drop(columns=['doc_hash', 'inserted_at', 'updated_at'], inplace=True)
     dataframe['doc_emission_date'] = pd.to_datetime(dataframe.doc_emission_date)
+
+    dataframe = dataframe.rename(columns={'doc_emission_date': 'date'})
     return dataframe
 
-#Represents an EARNING
-def load_invoices_from_nif_earnings(nif):
-   query = "SELECT invoices.*, cn.nif as company_nif, csn.nif as company_seller_nif, cat.name as category\
-               FROM invoices\
-            INNER JOIN companies as cn ON invoices.company_id=cn.id\
-            INNER JOIN companies as csn ON invoices.company_seller_id=csn.id\
-            LEFT JOIN categories as cat ON invoices.category_id=cat.id\
-               WHERE csn.nif='"+nif+"'"
+#Represents an INCOME
+def load_invoices_from_nif_incomes(nif):
+   query = "SELECT incomes.value, incomes.date , incomes.description\
+               FROM incomes\
+            INNER JOIN companies as cn ON incomes.company_id=cn.id\
+               WHERE cn.nif='"+nif+"'"
 
    dataframe = psql.read_sql(query, connection)
-   pd.set_option('display.expand_frame_repr', False)
-   dataframe.drop(columns=['doc_hash', 'inserted_at', 'updated_at'], inplace=True)
-   dataframe['doc_emission_date'] = pd.to_datetime(dataframe.doc_emission_date)      
+   dataframe['date'] = pd.to_datetime(dataframe.date) 
+   dataframe.columns = ['total_value','date','description']    
    return dataframe
 
 
@@ -43,18 +41,21 @@ def adjust_datasets_length(costs, gains):
    if costs.empty and gains.empty:
       return costs, gains
 
-   sd_c = costs.head(1)['dates'] if not costs.empty else gains.head(1)['dates']
-   sd_g = gains.head(1)['dates'] if not gains.empty else costs.head(1)['dates']
+   costs = costs.set_index('dates')
+   gains = gains.set_index('dates')
 
-   ed_c = costs.tail(1)['dates'] if not costs.empty else gains.tail(1)['dates']
-   ed_g = gains.tail(1)['dates'] if not gains.empty else costs.tail(1)['dates']
+   sd_c = costs.head(1).index if not costs.empty else gains.head(1).index
+   sd_g = gains.head(1).index if not gains.empty else costs.head(1).index
 
-   if (sd_c > sd_g).bool():
+   ed_c = costs.tail(1).index if not costs.empty else gains.tail(1).index
+   ed_g = gains.tail(1).index if not gains.empty else costs.tail(1).index
+
+   if (sd_c > sd_g)[0]:
       start_date = sd_g
    else:
       start_date = sd_c
 
-   if (ed_c > ed_g).bool():
+   if (ed_c > ed_g)[0]:
       end_date = ed_c
    else:
       end_date = ed_g
@@ -70,9 +71,6 @@ def adjust_datasets_length(costs, gains):
       columns=['values']
    )
    gains_new.index.name = 'dates'
-
-   costs = costs.set_index('dates')
-   gains = gains.set_index('dates')
 
    costs_new = costs_new.combine_first(costs).fillna(0, downcast='infer')
    gains_new = gains_new.combine_first(gains).fillna(0, downcast='infer')
