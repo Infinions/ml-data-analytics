@@ -4,6 +4,10 @@ import itertools
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error
+from Data.load_data import clean_missing_data
+
+
+import matplotlib.pyplot as plt
 
 def __prepare_data(data):
     pr_data = data[['doc_emission_date','total_value']]
@@ -11,10 +15,11 @@ def __prepare_data(data):
     pr_data['ds'] = pd.to_datetime(pr_data['ds'])
 
     pr_data = pr_data.set_index('ds')
-    pr_data = pr_data.resample('D').sum().fillna(0)     # TODO Better handling for missing data
-    pr_data = pr_data.reset_index()
+
+    pr_data = clean_missing_data(pr_data, 'ds','y')
 
     return pr_data
+
 
 
 def __calculate_best_model(data):
@@ -49,32 +54,57 @@ def __evaluate_model(model, dataset):
     test = dataset[len_train:]
 
     model.fit(train)
+
     future = model.make_future_dataframe(periods=len_test)
     forecast = model.predict(future)
-
+    fig = model.plot(forecast)
+    plt.show()
     rms = mean_squared_error(test['y'], forecast[len_train:]['yhat'], squared=False)
+    print("======RMS======", rms)
     return rms
 
-def forecast_growth_simple(dataset, time, delta='D'):
-    prep_data = __prepare_data(dataset)
+def __forecast_growth_simple(prep_data, time):
+    country = "PTE"     #TODO_FUTURE add country possibility
 
-    #model_add = Prophet(yearly_seasonality=True, seasonality_mode='additive')
+    model_add = Prophet(yearly_seasonality=True, seasonality_mode='additive', weekly_seasonality=True)
+    model_add.add_country_holidays(country)           
     model_mul = Prophet(yearly_seasonality=True, seasonality_mode='multiplicative', weekly_seasonality=True)
-    model_mul.add_country_holidays("PTE")           #TODO_FUTURE add country possibility
+    model_mul.add_country_holidays(country) 
 
-    #rms1 = __evaluate_model(model_add, prep_data)
+    rms1 = __evaluate_model(model_add, prep_data)
     rms2 = __evaluate_model(model_mul, prep_data)
 
-    #if rms1 > rms2:
-    #    best = model_mul
-    #else:
-    #    best = model_add
-    best = model_mul
+    if rms1 > rms2:
+        best = Prophet(yearly_seasonality=True, seasonality_mode='multiplicative')
+    else:
+        best = Prophet(yearly_seasonality=True, seasonality_mode='additive')
+    best.add_country_holidays(country)
+    best.fit(prep_data)
+
+
     future = best.make_future_dataframe(periods=time)
     forecast = best.predict(future)
-    
-    return forecast
 
-def forecast_growth_advanced(dataset, time, delta='D'):
-    prep_data = __prepare_data(dataset)
+    return best, forecast
+
+#TODO CREATE ADVANCED DISCOVERY METHOD
+def __forecast_growth_advanced(prep_data, time):
     __calculate_best_model(prep_data)
+    return None, None
+
+def forecast_growth(dataset, time, delta='D', method='simple'):
+    prep_data = __prepare_data(dataset)
+    if method == 'advanced':
+        _, forecast = __forecast_growth_advanced(prep_data, time)
+    else:
+        _, forecast = __forecast_growth_simple(prep_data, time)
+    
+    y_values = forecast[['ds','yhat_lower','yah','yhat_upper']]
+
+    #If it not daily data
+    if delta != 'D':
+        y_values = pd.DataFrame(y_values.groupby([pd.Grouper(key='ds', freq=delta)])['yhat_lower','yah','yhat_upper'].sum()).reset_index()
+
+    # TODO Collect old data and add new data for a more realistic visualization
+
+    return values

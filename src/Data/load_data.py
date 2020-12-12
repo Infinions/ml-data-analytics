@@ -3,9 +3,12 @@ import pandas as pd
 import pandas.io.sql as psql
 import numpy as np
  
+MIN_INVOICES_PER_MONTH = 5
+
+
 # get connected to the database
-connection = pg.connect(dbname="infin_dev", user="infin", password="infin",
-                        host="localhost", port="5432")  # Change to read from configuration file
+#connection = pg.connect(dbname="infin_dev", user="infin", password="infin",
+#                        host="localhost", port="5432")  # Change to read from configuration file
 
 
 #Represents a COST
@@ -79,6 +82,22 @@ def adjust_datasets_length(costs, gains):
    gains_new.reset_index(inplace=True)
 
    return costs_new, gains_new
+
+
+def clean_missing_data(data, ind, val):
+   clean_data = pd.DataFrame(data.reset_index().groupby([pd.Grouper(key=ind, freq='D')])[val].sum()).reset_index()
+
+   # Set NA to montly data without/low number of invoices (it's best to assume it's missing as opposed to no actual/only some invoices were created)
+   tmp_data = pd.DataFrame(data.reset_index().groupby([pd.Grouper(key=ind, freq='M')])[val].count())
+
+   for i, _ in tmp_data[tmp_data[val] < MIN_INVOICES_PER_MONTH].iterrows():
+      end_m   = i
+      start_m = i.replace(day=1)
+      clean_data.loc[(clean_data[ind] >= start_m) & (clean_data[ind] <= end_m),val] = None
+
+
+   return clean_data   
+
 
 
 '''

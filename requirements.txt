@@ -12,3 +12,5 @@ Keras==2.4.3
 jupyter==1.0.0
 graphene==2.1.8
 Flask-GraphQL==2.0.1
+matplotlib==3.3.3
+plotly==4.14.1
