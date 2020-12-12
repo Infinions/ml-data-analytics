@@ -13,6 +13,12 @@ Y -> yearly data
 """
 
 def invoices_sum_per_timedelta(data, delta):
+    """Get sum of invoices on a specific timedelta
+    Args:
+        data: Dataframe, Dataset.
+        delta: String, timedelta for getting data.
+    """
+
     tmp_data = data.copy()
     tmp_data = tmp_data[['total_value', 'date']]
 
@@ -35,6 +41,14 @@ def n_invoices_per_category(data):
  """
 
 def invoices_per_category_per_delta(data, delta, category, count):
+    """Get invoices by category with a specific timedelta
+    Args:
+        data: Dataframe, Dataset.
+        delta: String, timedelta for getting data.
+        category: String or None, if the first then filter by that category.
+        count: Boolean, True for counts of invoices per category instead of a sum.
+    """
+
     tmp_data = data.copy()
     tmp_data = tmp_data[['category','date','total_value']]
 
@@ -55,6 +69,14 @@ def invoices_per_category_per_delta(data, delta, category, count):
 
 
 def invoices_per_client_per_delta(data, delta, client_nif, count):
+    """Get invoices by clients with a specific timedelta
+    Args:
+        data: Dataframe, Dataset.
+        delta: String, timedelta for getting data.
+        client_nif: String or None, if the first then filter by that client.
+        count: Boolean, True for counts of invoices per client instead of a sum.
+    """
+
     tmp_data = data.copy()
     tmp_data = tmp_data[['company_seller_name','company_seller_nif','date', 'total_value']]
 
@@ -74,3 +96,22 @@ def invoices_per_client_per_delta(data, delta, client_nif, count):
         return tmp_data
     
     return tmp_data
+
+
+def filter_by_date(data, date_col, w_start, w_end):
+    """Filters data by start/end date.
+    Args:
+        data: Dataframe, Data to be filtered.
+        date_col: String, Name of the column with the date.
+        w_start: String, Start date.
+        w_end: String, End date.
+    """
+
+    if w_start != '':
+            w_start = pd.to_datetime(w_start)
+            data = data[(data[date_col] >= w_start)]
+    if w_end != '':
+            w_end = pd.to_datetime(w_end)
+            data = data[(data[date_col] <= w_end)]
+
+    return data

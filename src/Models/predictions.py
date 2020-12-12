@@ -10,6 +10,11 @@ from Data.load_data import clean_missing_data
 import matplotlib.pyplot as plt
 
 def __prepare_data(data):
+   """Prepare data for training.
+   Args:
+      data: Dataframe, dataset.
+   """
+
     pr_data = data[['doc_emission_date','total_value']]
     pr_data.columns = ['ds','y']
     pr_data['ds'] = pd.to_datetime(pr_data['ds'])
@@ -48,6 +53,12 @@ def __calculate_best_model(data):
 
 
 def __evaluate_model(model, dataset):
+    """Forecast the data by _time_ window, with simple method.
+    Args:
+        model: Prophet, model to evaluate.
+        dataset: Dataframe, data to be trained.
+    """
+
     len_train = round(dataset.shape[0] * 0.75)
     len_test = len(dataset) - len_train
     train = dataset[:len_train]
@@ -64,6 +75,12 @@ def __evaluate_model(model, dataset):
     return rms
 
 def __forecast_growth_simple(prep_data, time):
+   """Forecast the data by _time_ window, with simple method.
+   Args:
+      prep_data: Dataframe, dataset already prepared.
+      time: Integer, number of day of forecast.
+   """
+
     country = "PTE"     #TODO_FUTURE add country possibility
 
     model_add = Prophet(yearly_seasonality=True, seasonality_mode='additive', weekly_seasonality=True)
@@ -89,10 +106,24 @@ def __forecast_growth_simple(prep_data, time):
 
 #TODO CREATE ADVANCED DISCOVERY METHOD
 def __forecast_growth_advanced(prep_data, time):
+    """Forecast the data by _time_ window, with advanced method.
+    Args:
+        prep_data: Dataframe, dataset already prepared.
+        time: Integer, number of day of forecast.
+    """
+
     __calculate_best_model(prep_data)
     return None, None
 
 def forecast_growth(dataset, time, delta='D', method='simple'):
+    """Forecast the data by _time_ window, with simple method.
+    Args:
+        prep_data: Dataframe, dataset to create model.
+        time: Integer, number of day of forecast.
+        delta: String, timedelta for showing the data.
+        method: String, method of training the model (Simple/Advanced)
+    """
+
     prep_data = __prepare_data(dataset)
     if method == 'advanced':
         _, forecast = __forecast_growth_advanced(prep_data, time)
@@ -107,4 +138,4 @@ def forecast_growth(dataset, time, delta='D', method='simple'):
 
     # TODO Collect old data and add new data for a more realistic visualization
 
-    return values
+    return y_values
