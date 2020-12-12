@@ -28,7 +28,7 @@ To run, simply run
 python api.py
 ```
 
-and access the graphql interface on http://localhost:5000/graphql .
+and access the graphql interface on http://localhost:5600/graphql .
 
 ### Available Querys
 
@@ -40,6 +40,8 @@ query {
 ```
 - nif -> String, required;
 - delta -> String, optional (default "D")
+- window_start -> String, optional (default None)
+- window_end -> String, optional (default None)
 
 #### Invoices per category
 ```
@@ -51,6 +53,8 @@ query {
 - delta: String, optional (default "M");
 - is_count: Boolean, optional (default True);
 - category: String, optional (default None);
+- window_start -> String, optional (default None)
+- window_end -> String, optional (default None)
 
 #### Invoices per client
 ```
@@ -62,6 +66,8 @@ query {
 - delta: String, optional (default "M");
 - is_count: Boolean, optional (default True);
 - client_nif: String, optional (default None);
+- window_start -> String, optional (default None)
+- window_end -> String, optional (default None)
 
 ---
 ---

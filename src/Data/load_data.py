@@ -2,13 +2,19 @@ import psycopg2 as pg
 import pandas as pd
 import pandas.io.sql as psql
 import numpy as np
+import os
  
 MIN_INVOICES_PER_MONTH = 5
 
+dbname = os.getenv('db') if os.getenv('db') != None else "infin_dev"
+dbuser = os.getenv('dbUser') if os.getenv('dbUser') != None else "infin"
+dbpwd  = os.getenv('dbPwd') if os.getenv('dbPwd') != None else "infin"
+dbport  = os.getenv('dbPort') if os.getenv('dbPort') != None else "5432"
+dbHost = os.getenv('dbHost') if os.getenv('dbHost') != None else "localhost"
 
 # connection to the database
-connection = pg.connect(dbname="infin_dev", user="infin", password="infin",
-                        host="localhost", port="5432")  # Change to read from configuration file
+connection = pg.connect(dbname=dbname, user=dbuser, password=dbpwd,
+                        host=dbHost, port=dbport)
 
 
 #Represents a COST
