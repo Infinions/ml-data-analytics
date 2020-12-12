@@ -18,19 +18,19 @@ def load_invoices_from_nif_costs(nif):
       nif: String, nif of the user.
    """
    
-    query = "SELECT invoices.*, cn.nif as company_nif, cn.name as company_name, csn.nif as company_seller_nif, csn.name as company_seller_name, cat.name as category\
-                FROM invoices\
-             INNER JOIN companies as cn ON invoices.company_id=cn.id\
-             INNER JOIN companies as csn ON invoices.company_seller_id=csn.id\
-             LEFT JOIN categories as cat ON invoices.category_id=cat.id\
-                WHERE cn.nif='"+nif+"'"
+   query = "SELECT invoices.*, cn.nif as company_nif, cn.name as company_name, csn.nif as company_seller_nif, csn.name as company_seller_name, cat.name as category\
+               FROM invoices\
+            INNER JOIN companies as cn ON invoices.company_id=cn.id\
+            INNER JOIN companies as csn ON invoices.company_seller_id=csn.id\
+            LEFT JOIN categories as cat ON invoices.category_id=cat.id\
+               WHERE cn.nif='"+nif+"'"
 
-    dataframe = psql.read_sql(query, connection)
-    dataframe.drop(columns=['doc_hash', 'inserted_at', 'updated_at'], inplace=True)
-    dataframe['doc_emission_date'] = pd.to_datetime(dataframe.doc_emission_date)
+   dataframe = psql.read_sql(query, connection)
+   dataframe.drop(columns=['doc_hash', 'inserted_at', 'updated_at'], inplace=True)
+   dataframe['doc_emission_date'] = pd.to_datetime(dataframe.doc_emission_date)
 
-    dataframe = dataframe.rename(columns={'doc_emission_date': 'date'})
-    return dataframe
+   dataframe = dataframe.rename(columns={'doc_emission_date': 'date'})
+   return dataframe
 
 #Represents an INCOME
 def load_invoices_from_nif_incomes(nif):
