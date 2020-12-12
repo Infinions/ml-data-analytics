@@ -6,13 +6,18 @@ import numpy as np
 MIN_INVOICES_PER_MONTH = 5
 
 
-# get connected to the database
-#connection = pg.connect(dbname="infin_dev", user="infin", password="infin",
-#                        host="localhost", port="5432")  # Change to read from configuration file
+# connection to the database
+connection = pg.connect(dbname="infin_dev", user="infin", password="infin",
+                        host="localhost", port="5432")  # Change to read from configuration file
 
 
 #Represents a COST
 def load_invoices_from_nif_costs(nif):
+   """Load invoices from database by nif, by costs
+   Args:
+      nif: String, nif of the user.
+   """
+   
     query = "SELECT invoices.*, cn.nif as company_nif, cn.name as company_name, csn.nif as company_seller_nif, csn.name as company_seller_name, cat.name as category\
                 FROM invoices\
              INNER JOIN companies as cn ON invoices.company_id=cn.id\
@@ -29,6 +34,11 @@ def load_invoices_from_nif_costs(nif):
 
 #Represents an INCOME
 def load_invoices_from_nif_incomes(nif):
+   """Load invoices from database by nif, by incomes
+   Args:
+      nif: String, nif of the user.
+    """
+
    query = "SELECT incomes.value, incomes.date , incomes.description\
                FROM incomes\
             INNER JOIN companies as cn ON incomes.company_id=cn.id\
@@ -41,6 +51,12 @@ def load_invoices_from_nif_incomes(nif):
 
 
 def adjust_datasets_length(costs, gains):
+   """Adjust both datasets so they can have equal date lenghts
+   Args:
+      costs: Dataframe, costs data.
+      gains: Dataframe, gains data.
+   """
+
    if costs.empty and gains.empty:
       return costs, gains
 
@@ -85,6 +101,13 @@ def adjust_datasets_length(costs, gains):
 
 
 def clean_missing_data(data, ind, val):
+   """Clean missing data from a dataset. It also handles outliers.
+   Args:
+      data: Dataframe, costs data.
+      ind: String, date column name.
+      val: String, value column name.
+   """
+   
    clean_data = pd.DataFrame(data.reset_index().groupby([pd.Grouper(key=ind, freq='D')])[val].sum()).reset_index()
 
    # Set NA to montly data without/low number of invoices (it's best to assume it's missing as opposed to no actual/only some invoices were created)
@@ -113,7 +136,7 @@ def load_and_prepare_data(nif):
 
    final_data = pd.concat([data_costs, data_earns], axis=1)
 
-   final_data = final_data.resample('D').pad()     # TODO Better handling for missing data
+   final_data = final_data.resample('D').pad()     
    print(final_data.head())
    final_data = final_data.reset_index()
 
