@@ -34,6 +34,7 @@ def load_invoices_from_nif_costs(nif):
    dataframe = psql.read_sql(query, connection)
    dataframe.drop(columns=['doc_hash', 'inserted_at', 'updated_at'], inplace=True)
    dataframe['doc_emission_date'] = pd.to_datetime(dataframe.doc_emission_date)
+   dataframe['total_value'] = dataframe['total_value'] / 100   # Due to the way the BD stores it
 
    dataframe = dataframe.rename(columns={'doc_emission_date': 'date'})
    return dataframe
@@ -52,7 +53,9 @@ def load_invoices_from_nif_incomes(nif):
 
    dataframe = psql.read_sql(query, connection)
    dataframe['date'] = pd.to_datetime(dataframe.date) 
-   dataframe.columns = ['total_value','date','description']    
+   dataframe.columns = ['total_value','date','description']
+   dataframe['total_value'] = dataframe['total_value'] / 100   # Due to the way the BD stores it
+
    return dataframe
 
 
