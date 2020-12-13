@@ -6,11 +6,11 @@ import os
  
 MIN_INVOICES_PER_MONTH = 5
 
-dbname = os.getenv('db') if os.getenv('db') != None else "infin_dev"
-dbuser = os.getenv('dbUser') if os.getenv('dbUser') != None else "infin"
-dbpwd  = os.getenv('dbPwd') if os.getenv('dbPwd') != None else "infin"
-dbport  = os.getenv('dbPort') if os.getenv('dbPort') != None else "5432"
-dbHost = os.getenv('dbHost') if os.getenv('dbHost') != None else "localhost"
+dbname = os.getenv('DB_NAME') if os.getenv('DB_NAME') != None else "infin_dev"
+dbuser = os.getenv('DB_USER') if os.getenv('DB_USER') != None else "infin"
+dbpwd  = os.getenv('DB_PWD') if os.getenv('DB_PWD') != None else "infin"
+dbport  = os.getenv('DB_PORT') if os.getenv('DB_PORT') != None else "5432"
+dbHost = os.getenv('DB_HOST') if os.getenv('DB_HOST') != None else "localhost"
 
 # connection to the database
 connection = pg.connect(dbname=dbname, user=dbuser, password=dbpwd,

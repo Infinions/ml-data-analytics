@@ -6,6 +6,7 @@ RUN set -eux; \
     gcc \
     libpq-dev \
     libc-dev \
+    netcat \
     ; \
     rm -rf /var/lib/apt/lists/*
 

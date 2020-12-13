@@ -1,0 +1,39 @@
+version: '3.1'
+
+services:
+  analytics:
+    image: analytics
+    ports:
+      - "5000:5000"
+    environment:
+      API_PORT: 5000
+      DB_NAME: infin
+      DB_USER: infin
+      DB_PORT: 5432
+      DB_PWD: kohpien0Lu5ceheiG6kohchie0eiteeL
+      DB_HOST: db
+  
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: infin
+      POSTGRES_PASSWORD: kohpien0Lu5ceheiG6kohchie0eiteeL
+      POSTGRES_USER: infin
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  infin:
+    image: repo.treescale.com/infinions/infin:latest
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_URL: ecto://infin:kohpien0Lu5ceheiG6kohchie0eiteeL@db/infin
+      SECRET_KEY_BASE: vk31KWVZn5Kusu/SLCn2fSRh90QehFGEMP3OE4oNDNPdaijn91Soic0X22jrZaS+
+      PORT: 4000
+
+volumes:
+  pgdata:
