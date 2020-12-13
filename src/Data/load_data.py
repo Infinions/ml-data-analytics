@@ -2,13 +2,19 @@ import psycopg2 as pg
 import pandas as pd
 import pandas.io.sql as psql
 import numpy as np
+import os
  
 MIN_INVOICES_PER_MONTH = 5
 
+dbname = os.getenv('DB_NAME') if os.getenv('DB_NAME') != None else "infin_dev"
+dbuser = os.getenv('DB_USER') if os.getenv('DB_USER') != None else "infin"
+dbpwd  = os.getenv('DB_PWD') if os.getenv('DB_PWD') != None else "infin"
+dbport  = os.getenv('DB_PORT') if os.getenv('DB_PORT') != None else "5432"
+dbHost = os.getenv('DB_HOST') if os.getenv('DB_HOST') != None else "localhost"
 
 # connection to the database
-connection = pg.connect(dbname="infin_dev", user="infin", password="infin",
-                        host="localhost", port="5432")  # Change to read from configuration file
+connection = pg.connect(dbname=dbname, user=dbuser, password=dbpwd,
+                        host=dbHost, port=dbport)
 
 
 #Represents a COST
@@ -28,6 +34,7 @@ def load_invoices_from_nif_costs(nif):
    dataframe = psql.read_sql(query, connection)
    dataframe.drop(columns=['doc_hash', 'inserted_at', 'updated_at'], inplace=True)
    dataframe['doc_emission_date'] = pd.to_datetime(dataframe.doc_emission_date)
+   dataframe['total_value'] = dataframe['total_value'] / 100   # Due to the way the BD stores it
 
    dataframe = dataframe.rename(columns={'doc_emission_date': 'date'})
    return dataframe
@@ -46,7 +53,9 @@ def load_invoices_from_nif_incomes(nif):
 
    dataframe = psql.read_sql(query, connection)
    dataframe['date'] = pd.to_datetime(dataframe.date) 
-   dataframe.columns = ['total_value','date','description']    
+   dataframe.columns = ['total_value','date','description']
+   dataframe['total_value'] = dataframe['total_value'] / 100   # Due to the way the BD stores it
+
    return dataframe
 
 
