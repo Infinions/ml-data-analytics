@@ -1,4 +1,5 @@
 from flask import Flask, request
+from flask_cors import CORS
 from flask_graphql import GraphQLView
 import os
 import json
@@ -9,7 +10,7 @@ from graphene import Schema
 port = os.getenv('API_PORT') if os.getenv('API_PORT') != None else "5600"
 
 app = Flask(__name__)
-
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 schema = Schema(query=RootQuery, auto_camelcase=False)
 
 app.add_url_rule('/graphql', view_func=GraphQLView.as_view(

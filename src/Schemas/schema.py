@@ -83,6 +83,13 @@ class RootQuery(ObjectType):
         # Make both dataframes with the same timeline to safely concat after
         res1, res2 = load_data.adjust_datasets_length(res1, res2)
 
+        # After making same length, both need to be readjusted relative to delta
+        if delta != 'D':
+            res1 = res1.groupby([pd.Grouper(key="dates", freq=delta)])['values'].sum()
+            res1 = res1.reset_index()
+            res2 = res2.groupby([pd.Grouper(key="dates", freq=delta)])['values'].sum()
+            res2 = res2.reset_index()
+
         res1 = data_manipulation.filter_by_date(res1, 'dates', window_start, window_end)
         res2 = data_manipulation.filter_by_date(res2, 'dates', window_start, window_end)
 
