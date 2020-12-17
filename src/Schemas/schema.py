@@ -1,6 +1,7 @@
-from graphene import ObjectType, Schema, Field, List, String, Boolean, JSONString
+from graphene import ObjectType, Schema, Field, List, String, Boolean, JSONString, Int
 import pandas as pd
 import Models.statistics as data_manipulation
+import Models.predictions as data_predictors
 import json
 import Data.load_data as load_data
 import time
@@ -10,52 +11,78 @@ export_type = 'columns'
 
 class RootQuery(ObjectType):
     class Meta:
-        description = "Query manager for retreiving chart data"
+        description = "Query manager for retreiving chart data."
 
     sum_invoices = JSONString(
-        description = "Sum of invoices from a user",
+        description = "Sum of invoices from a user.",
         nif         = String(required=True),
         delta       = String(default_value='D'),
         window_start      = String(default_value=''),
-        window_end        = String(default_value=''),
+        window_end        = String(default_value='')
     )
     n_invoices_category = JSONString(
-        description = "Count or sum of invoices from a user relative to categorie(s)",
+        description = "Count or sum of invoices from a user relative to categorie(s).",
         nif         = String(required=True),
         delta       = String(default_value='M'),
         is_count    = Boolean(default_value=True),
         category    = String(default_value=""),
         window_start = String(default_value=''),
-        window_end   = String(default_value=''),
-
+        window_end   = String(default_value='')
     )
     n_invoices_client = JSONString(
-        description  = "Count or sum of invoices from a user relative to client(s)",
+        description  = "Count or sum of invoices from a user relative to client(s).",
         nif          = String(required=True),
         delta        = String(default_value='M'),
         is_count     = Boolean(default_value=True),
         client_nif   = String(default_value=""),
         window_start = String(default_value=''),
-        window_end   = String(default_value=''),
-
+        window_end   = String(default_value='')
+    )
+    predict_future = JSONString(
+        description  = "Predict the future of the costs, based on a simpler but quicker approach.",
+        nif          = String(required=True),
+        time         = Int(required=True),
+        delta        = String(default_value='M'),
+        method       = String(default_value='simple')
     )
 
-    #TODO Missing return format
+    @staticmethod
+    def resolve_predict_future(parent, info, nif, time, delta, method):
+        data_costs = load_data.load_invoices_from_nif_costs(nif)
+
+        res1 = data_predictors.forecast_growth(data_costs, time, delta, method)
+
+        json_format = {
+            'dates': res1['date'].dt.strftime('%Y-%m-%d').tolist(),
+            'total_value': res1['total_value'].tolist(),
+        }        
+        return json_format
+
     @staticmethod
     def resolve_n_invoices_client(parent, info, nif, delta, is_count, client_nif, window_start, window_end):
         if client_nif == "":
             client_nif = None
+
         data_costs = load_data.load_invoices_from_nif_costs(nif)
 
         res1 = data_manipulation.invoices_per_client_per_delta(data_costs, delta, client_nif, is_count)
-        res1 = data_manipulation.filter_by_date(res1, 'date', window_start, window_end)
+        res1 = load_data.filter_by_date(res1, 'date', window_start, window_end)
 
-        res1['date'] = res1['date'].dt.strftime('%Y-%m-%d')
+        res1 = res1.set_index(['date','company_seller_name'])
+        res1 = load_data.fill_gap_dates(res1)
+        res1 = res1.reset_index() 
+        res1 = res1.rename(columns={'level_0': 'date'})
 
-        res1 = res1.to_json(orient=export_type)
-        return res1
+        json_format = {
+            'dates': res1['date'].dt.strftime('%Y-%m-%d').unique().tolist(),
+            'companies': {}
+        }
 
-    #TODO missing return format
+        for r in res1['company_seller_name'].unique():
+            json_format['companies'][r] = res1[res1['company_seller_name'] == r]['total_value'].tolist()
+
+        return json_format
+
     @staticmethod
     def resolve_n_invoices_category(parent, info, nif, delta, is_count, category, window_start, window_end):
         if category == "":
@@ -64,11 +91,22 @@ class RootQuery(ObjectType):
         data_costs = load_data.load_invoices_from_nif_costs(nif)
 
         res1 = data_manipulation.invoices_per_category_per_delta(data_costs, delta, category, is_count)
-        res1 = data_manipulation.filter_by_date(res1, 'date', window_start, window_end)
+        res1 = load_data.filter_by_date(res1, 'date', window_start, window_end)
 
-        res1['date'] = res1['date'].dt.strftime('%Y-%m-%d')
-        res1 = res1.to_json(orient=export_type)
-        return res1
+        res1 = res1.set_index(['date','category'])
+        res1 = load_data.fill_gap_dates(res1)
+        res1 = res1.reset_index() 
+        res1 = res1.rename(columns={'level_0': 'date'})
+
+        json_format = {
+            'dates': res1['date'].dt.strftime('%Y-%m-%d').unique().tolist(),
+            'categories': {}
+        }
+
+        for r in res1['category'].unique():
+            json_format['categories'][r] = res1[res1['category'] == r]['total_value'].tolist()
+
+        return json_format
 
     @staticmethod
     def resolve_sum_invoices(parent, info, nif, delta, window_start, window_end):
@@ -90,8 +128,8 @@ class RootQuery(ObjectType):
             res2 = res2.groupby([pd.Grouper(key="dates", freq=delta)])['values'].sum()
             res2 = res2.reset_index()
 
-        res1 = data_manipulation.filter_by_date(res1, 'dates', window_start, window_end)
-        res2 = data_manipulation.filter_by_date(res2, 'dates', window_start, window_end)
+        res1 = load_data.filter_by_date(res1, 'dates', window_start, window_end)
+        res2 = load_data.filter_by_date(res2, 'dates', window_start, window_end)
 
         json_format = {
             'dates': res1['dates'].dt.strftime('%Y-%m-%d').tolist(),

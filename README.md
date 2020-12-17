@@ -69,6 +69,16 @@ query {
 - window_start -> String, optional (default None)
 - window_end -> String, optional (default None)
 
+#### Predict invoices
+```
+query {
+    predict_future(nif: "...", ...)
+}
+```
+- nif: String, required;
+- time: Int, required;
+- delta: String, optional (default "M");
+- method: String, "simple" or "advanced" (default "simple")
 ---
 ---
 ---

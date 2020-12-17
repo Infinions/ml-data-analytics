@@ -5,17 +5,14 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error
 from Data.load_data import clean_missing_data
-
-
 import matplotlib.pyplot as plt
 
 def __prepare_data(data):
-   """Prepare data for training.
-   Args:
-      data: Dataframe, dataset.
-   """
-
-    pr_data = data[['doc_emission_date','total_value']]
+    """Prepare data for training.
+    Args:
+        data: Dataframe, dataset.
+    """
+    pr_data = data[['date','total_value']]
     pr_data.columns = ['ds','y']
     pr_data['ds'] = pd.to_datetime(pr_data['ds'])
 
@@ -68,18 +65,16 @@ def __evaluate_model(model, dataset):
 
     future = model.make_future_dataframe(periods=len_test)
     forecast = model.predict(future)
-    fig = model.plot(forecast)
-    plt.show()
     rms = mean_squared_error(test['y'], forecast[len_train:]['yhat'], squared=False)
     print("======RMS======", rms)
     return rms
 
 def __forecast_growth_simple(prep_data, time):
-   """Forecast the data by _time_ window, with simple method.
-   Args:
-      prep_data: Dataframe, dataset already prepared.
-      time: Integer, number of day of forecast.
-   """
+    """Forecast the data by _time_ window, with simple method.
+    Args:
+        prep_data: Dataframe, dataset already prepared.
+        time: Integer, number of day of forecast.
+    """
 
     country = "PTE"     #TODO_FUTURE add country possibility
 
@@ -123,19 +118,21 @@ def forecast_growth(dataset, time, delta='D', method='simple'):
         delta: String, timedelta for showing the data.
         method: String, method of training the model (Simple/Advanced)
     """
-
     prep_data = __prepare_data(dataset)
+
     if method == 'advanced':
         _, forecast = __forecast_growth_advanced(prep_data, time)
     else:
         _, forecast = __forecast_growth_simple(prep_data, time)
     
-    y_values = forecast[['ds','yhat_lower','yah','yhat_upper']]
+    y_values = forecast[['ds','yhat_lower','yhat','yhat_upper']]
 
     #If it not daily data
     if delta != 'D':
-        y_values = pd.DataFrame(y_values.groupby([pd.Grouper(key='ds', freq=delta)])['yhat_lower','yah','yhat_upper'].sum()).reset_index()
+        y_values = pd.DataFrame(y_values.groupby([pd.Grouper(key='ds', freq=delta)])['yhat_lower','yhat','yhat_upper'].sum()).reset_index()
 
     # TODO Collect old data and add new data for a more realistic visualization
 
+    y_values = y_values[['ds','yhat']]
+    y_values.columns = ['date','total_value']
     return y_values

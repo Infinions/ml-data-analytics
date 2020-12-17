@@ -56,9 +56,9 @@ def invoices_per_category_per_delta(data, delta, category, count):
         tmp_data = tmp_data[tmp_data['category'] == category]
 
     if count is False:
-        tmp_data = pd.DataFrame(tmp_data.groupby([pd.Grouper(key="date", freq=delta),'category'])['total_value'].sum())
+        tmp_data = pd.tmp_data.groupby([pd.Grouper(key="date", freq=delta),'category'])['total_value'].sum()
     else:
-        tmp_data = pd.DataFrame(tmp_data.groupby([pd.Grouper(key="date", freq=delta),'category'])['total_value'].count())
+        tmp_data = pd.tmp_data.groupby([pd.Grouper(key="date", freq=delta),'category'])['total_value'].count()
         tmp_data.columns = ['total_value']
 
     tmp_data = tmp_data.reset_index()
@@ -84,34 +84,14 @@ def invoices_per_client_per_delta(data, delta, client_nif, count):
         tmp_data = tmp_data[tmp_data['company_seller_nif'] == client_nif]
         tmp_data = tmp_data[['company_seller_name','date', 'total_value']]
 
-
     if count is False:
-        tmp_data = pd.DataFrame(tmp_data.groupby([pd.Grouper(key="date", freq=delta),'company_seller_name'])['total_value'].sum())
+        tmp_data = tmp_data.groupby([pd.Grouper(key="date", freq=delta),'company_seller_name'])['total_value'].sum()
     else:
-        tmp_data = pd.DataFrame(tmp_data.groupby([pd.Grouper(key="date", freq=delta),'company_seller_name'])['total_value'].count())
+        tmp_data = tmp_data.groupby([pd.Grouper(key="date", freq=delta),'company_seller_name'])['total_value'].count()
         tmp_data.columns = ['total_value']
 
     tmp_data = tmp_data.reset_index()
     if tmp_data.empty:
         return tmp_data
-    
+
     return tmp_data
-
-
-def filter_by_date(data, date_col, w_start, w_end):
-    """Filters data by start/end date.
-    Args:
-        data: Dataframe, Data to be filtered.
-        date_col: String, Name of the column with the date.
-        w_start: String, Start date.
-        w_end: String, End date.
-    """
-
-    if w_start != '':
-            w_start = pd.to_datetime(w_start)
-            data = data[(data[date_col] >= w_start)]
-    if w_end != '':
-            w_end = pd.to_datetime(w_end)
-            data = data[(data[date_col] <= w_end)]
-
-    return data

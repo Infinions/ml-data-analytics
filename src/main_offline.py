@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    #data = dat.load_invoices_from_nif_costs("1234")
+    data = dat.load_invoices_from_nif_costs("1234")
     #timedelta = 'D'
 
     
@@ -18,6 +18,32 @@ if __name__ == "__main__":
     nif="1234"
     delta="D"
 
+    tmp = pred.forecast_growth(data,15, delta, 'simple')
+    print(tmp)
+
+    #res1 = man.invoices_per_client_per_delta(data, delta, None, True)
+    #res1 = res1.set_index(['date','company_seller_name'])
+    #print(res1)
+    #tmp_data = dat.fill_gap_dates(res1)
+    #print(tmp_data)
+    #tmp_data = tmp_data.reset_index()
+    #tmp_data = tmp_data.rename(columns={'level_0': 'date'})
+    
+    #vals = {}
+
+    #for r in tmp_data['company_seller_name'].unique():
+    #    vals[r] = tmp_data[tmp_data['company_seller_name'] == r]['total_value'].values
+
+    #print(vals)
+
+
+
+    #cats = tmp_data['company_seller_name'].values.tolist()
+    #print(len(cats))
+    #vals = tmp_data['total_value'].values.tolist()
+    #print(len(vals))
+
+
    # data_costs = dat.load_invoices_from_nif_costs(nif)
     #data_earns = dat.load_invoices_from_nif_incomes(nif)
 
@@ -26,7 +52,7 @@ if __name__ == "__main__":
     #fig = model.plot(forecast)
     #plt.show()
 
-    data_costs = pd.read_csv('../testing_datasets/accounts_payable_v2_complete_adapted.csv')
+    """ data_costs = pd.read_csv('../testing_datasets/accounts_payable_v2_complete_adapted.csv')
     data_costs = data_costs.rename(columns={'doc_emission_date': 'date'})
     data_costs['date'] = pd.to_datetime(data_costs.date)
 
@@ -43,7 +69,7 @@ if __name__ == "__main__":
 
     res1 = res1[(res1['dates'] >= window_start) & (res1['dates'] <= window_end)]
 
-
+ """
     #json_format = {
     #    'dates': res1['dates'].tolist(),
     #    'costs_values': res1['values'].tolist(),

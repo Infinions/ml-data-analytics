@@ -4,7 +4,7 @@ import pandas.io.sql as psql
 import numpy as np
 import os
  
-MIN_INVOICES_PER_MONTH = 5
+MIN_INVOICES_PER_MONTH = 1    #TODO must be changed according to data
 
 dbname = os.getenv('DB_NAME') if os.getenv('DB_NAME') != None else "infin_dev"
 dbuser = os.getenv('DB_USER') if os.getenv('DB_USER') != None else "infin"
@@ -151,3 +151,36 @@ def load_and_prepare_data(nif):
 
    return final_data
 '''
+
+def fill_gap_dates(data):
+   """Fill missing dates between rows.
+   Args:
+      data: Dataframe, data to modify.
+   """
+   window_start = data.head(1).index[0][0]
+   window_end = data.tail(1).index[0][0]
+    
+   idx = pd.date_range(window_start, window_end)
+
+   (date_index, category_index) = data.index.levels
+   new_index = pd.MultiIndex.from_product([idx, category_index])
+   return data.reindex(new_index, fill_value=0)
+
+
+def filter_by_date(data, date_col, w_start, w_end):
+    """Filters data by start/end date.
+    Args:
+        data: Dataframe, Data to be filtered.
+        date_col: String, Name of the column with the date.
+        w_start: String, Start date.
+        w_end: String, End date.
+    """
+
+    if w_start != '':
+            w_start = pd.to_datetime(w_start)
+            data = data[(data[date_col] >= w_start)]
+    if w_end != '':
+            w_end = pd.to_datetime(w_end)
+            data = data[(data[date_col] <= w_end)]
+
+    return data
