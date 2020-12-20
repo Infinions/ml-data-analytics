@@ -14,36 +14,36 @@ class RootQuery(ObjectType):
         description = "Query manager for retreiving chart data."
 
     sum_invoices = JSONString(
-        description = "Sum of invoices from a user.",
-        nif         = String(required=True),
-        delta       = String(default_value='D'),
-        window_start      = String(default_value=''),
-        window_end        = String(default_value='')
+        description  = "Sum of invoices from a user.",
+        nif          = String(required=True, description="NIF of the user."),
+        delta        = String(default_value='D', description="Timedelta used for grouping of data."),
+        window_start = String(default_value='', description="Start date for the window of data."),
+        window_end   = String(default_value='', description="End date for the window of data.")
     )
     n_invoices_category = JSONString(
-        description = "Count or sum of invoices from a user relative to categorie(s).",
-        nif         = String(required=True),
-        delta       = String(default_value='M'),
-        is_count    = Boolean(default_value=True),
-        category    = String(default_value=""),
-        window_start = String(default_value=''),
-        window_end   = String(default_value='')
+        description  = "Count or sum of invoices from a user relative to categorie(s).",
+        nif          = String(required=True, description="NIF of the user."),
+        delta        = String(default_value='D', description="Timedelta used for grouping of data."),
+        is_count     = Boolean(default_value=True, description="If count instead of sum is desired."),
+        category     = String(default_value="", description="Specific category name to relate data to."),
+        window_start = String(default_value='', description="Start date for the window of data."),
+        window_end   = String(default_value='', description="End date for the window of data.")
     )
     n_invoices_client = JSONString(
         description  = "Count or sum of invoices from a user relative to client(s).",
-        nif          = String(required=True),
-        delta        = String(default_value='M'),
-        is_count     = Boolean(default_value=True),
-        client_nif   = String(default_value=""),
-        window_start = String(default_value=''),
-        window_end   = String(default_value='')
+        nif          = String(required=True, description="NIF of the user."),
+        delta        = String(default_value='D', description="Timedelta used for grouping of data."),
+        is_count     = Boolean(default_value=True, description="If count instead of sum is desired."),
+        client_nif   = String(default_value="", description="Specific client NIF to relate data to."),
+        window_start = String(default_value='', description="Start date for the window of data."),
+        window_end   = String(default_value='', description="End date for the window of data.")
     )
     predict_future = JSONString(
         description  = "Predict the future of the costs, based on a simpler but quicker approach.",
-        nif          = String(required=True),
-        time         = Int(required=True),
-        delta        = String(default_value='M'),
-        method       = String(default_value='simple')
+        nif          = String(required=True, description="NIF of the user."),
+        time         = Int(required=True, description="Amount of time to predict the future."),
+        delta        = String(default_value='D', description="Timedelta used for grouping of data."),
+        method       = String(default_value='simple', description="Method to create prediction. Simple means faster but less accurate.")
     )
 
     @staticmethod
