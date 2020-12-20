@@ -80,6 +80,8 @@ query {
 - delta: String, optional (default "M");
 - method: String, "simple" or "advanced" (default "simple")
 ---
+
+For more info head over to the more technical documentation [here](./doc/schema/index.html).
 ---
 ---
 
