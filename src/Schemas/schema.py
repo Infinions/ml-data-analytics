@@ -1,17 +1,19 @@
 from graphene import ObjectType, Schema, Field, List, String, Boolean, JSONString, Int
 import pandas as pd
+import time
+import json
 import Models.statistics as data_manipulation
 import Models.predictions as data_predictors
-import json
 import Data.load_data as load_data
-import time
+from Models import RecommendationSystem
+
 
 export_type = 'columns'
 
 
 class RootQuery(ObjectType):
     class Meta:
-        description = "Query manager for retreiving chart data."
+        description = "Query manager for retrieving chart data and other types of AI augmentation."
 
     sum_invoices = JSONString(
         description  = "Sum of invoices from a user.",
@@ -45,6 +47,25 @@ class RootQuery(ObjectType):
         delta        = String(default_value='D', description="Timedelta used for grouping of data."),
         method       = String(default_value='simple', description="Method to create prediction. Simple means faster but less accurate.")
     )
+    categorize_invoice = String(
+        description = "Recommends category for invoice based on previous ones.",
+        invoice     = JSONString(required=True, description="Invoice to be categorized.")
+    )
+
+    @staticmethod
+    def resolve_categorize_invoice(parent, info, invoice):
+        recommender = RecommendationSystem(invoice['nif'])
+        recommender.prepare_data()
+        if recommender.check_existing_model():
+            recommender.load_model()
+        else:
+            recommender.prepare_data()
+            recommender.train_model()
+
+        recommender.save_model()
+        category = recommender.recommend_category(invoice)
+        return category
+
 
     @staticmethod
     def resolve_predict_future(parent, info, nif, time, delta, method):
