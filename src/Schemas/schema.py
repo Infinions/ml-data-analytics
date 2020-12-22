@@ -2,12 +2,19 @@ from graphene import ObjectType, Schema, Field, List, String, Boolean, JSONStrin
 import pandas as pd
 import time
 import json
+<<<<<<< HEAD
 import os
 import Models.statistics as data_manipulation
 import Models.predictions as data_predictors
 import Data.load_data as load_data
 from Models.recomendation_system import RecommendationSystem
 from BD.mongo_controller import MongoController
+=======
+import Models.statistics as data_manipulation
+import Models.predictions as data_predictors
+import Data.load_data as load_data
+from Models import RecommendationSystem
+>>>>>>> Add recommendation system for categories
 
 
 export_type = 'columns'
