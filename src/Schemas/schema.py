@@ -2,25 +2,19 @@ from graphene import ObjectType, Schema, Field, List, String, Boolean, JSONStrin
 import pandas as pd
 import time
 import json
-<<<<<<< HEAD
 import os
 import Models.statistics as data_manipulation
 import Models.predictions as data_predictors
 import Data.load_data as load_data
 from Models.recomendation_system import RecommendationSystem
 from BD.mongo_controller import MongoController
-=======
-import Models.statistics as data_manipulation
-import Models.predictions as data_predictors
-import Data.load_data as load_data
-from Models import RecommendationSystem
->>>>>>> Add recommendation system for categories
 
 
 export_type = 'columns'
 mongo_string = os.getenv('DB_ANALYTICS') if os.getenv('DB_ANALYTICS') != None else ""
 
 db_controller = MongoController(mongo_string)
+
 
 class RootQuery(ObjectType):
     class Meta:
@@ -65,7 +59,11 @@ class RootQuery(ObjectType):
 
     @staticmethod
     def resolve_categorize_invoices(parent, info, invoices):
+<<<<<<< HEAD
         inv_dt = pd.DataFrame.from_dict(invoices['list'], orient='columns')
+=======
+        inv_dt = pd.read_json(json.dumps(invoices), orient='index')
+>>>>>>> Recommendation Sytem for categories
         inv_dt = inv_dt.rename(columns={'doc_emission_date': 'date'})
         inv_dt['nif'] = inv_dt.nif.astype(str)
         recommender = RecommendationSystem(inv_dt['nif'][0], db_controller)
@@ -74,8 +72,11 @@ class RootQuery(ObjectType):
             recommender.load_model()
         else:
             data = load_data.load_invoices_from_nif_costs(inv_dt['nif'][0])
+<<<<<<< HEAD
             if data.empty:
                 return []
+=======
+>>>>>>> Recommendation Sytem for categories
             recommender.prepare_data(data)
             recommender.train_model()
             recommender.save_model()
