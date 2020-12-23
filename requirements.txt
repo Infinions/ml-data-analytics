@@ -14,3 +14,4 @@ graphene==2.1.8
 Flask-GraphQL==2.0.1
 matplotlib==3.3.3
 plotly==4.14.1
+pymongo

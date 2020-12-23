@@ -5,11 +5,13 @@ import json
 import Models.statistics as data_manipulation
 import Models.predictions as data_predictors
 import Data.load_data as load_data
-from Models import RecommendationSystem
+from Models.recomendation_system import RecommendationSystem
+from BD.mongo_controller import MongoController
 
 
 export_type = 'columns'
 
+db_controller = MongoController("")
 
 class RootQuery(ObjectType):
     class Meta:
@@ -47,25 +49,33 @@ class RootQuery(ObjectType):
         delta        = String(default_value='D', description="Timedelta used for grouping of data."),
         method       = String(default_value='simple', description="Method to create prediction. Simple means faster but less accurate.")
     )
-    categorize_invoice = String(
-        description = "Recommends category for invoice based on previous ones.",
-        invoice     = JSONString(required=True, description="Invoice to be categorized.")
+    categorize_invoices = JSONString(
+        description = "Recommends category for multiple invoices.",
+        invoices    = JSONString(required=True, description="Invoices to be categorized.")
     )
 
     @staticmethod
-    def resolve_categorize_invoice(parent, info, invoice):
-        recommender = RecommendationSystem(invoice['nif'])
-        recommender.prepare_data()
+    def resolve_categorize_invoices(parent, info, invoices):
+        inv_dt = pd.read_json(json.dumps(invoices), orient='index')
+        inv_dt = inv_dt.rename(columns={'doc_emission_date': 'date'})
+        inv_dt['nif'] = inv_dt.nif.astype(str)
+        recommender = RecommendationSystem(inv_dt['nif'][0], db_controller)
+
         if recommender.check_existing_model():
             recommender.load_model()
         else:
-            recommender.prepare_data()
+            data = load_data.load_invoices_from_nif_costs(inv_dt['nif'][0])
+            recommender.prepare_data(data)
             recommender.train_model()
+            recommender.save_model()
 
-        recommender.save_model()
-        category = recommender.recommend_category(invoice)
-        return category
+        categories = recommender.recommend_category(inv_dt)
+        
+        results = {}
+        for i in range(len(categories)):
+            results[i] = int(categories[i])
 
+        return results
 
     @staticmethod
     def resolve_predict_future(parent, info, nif, time, delta, method):

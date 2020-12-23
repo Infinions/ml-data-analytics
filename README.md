@@ -39,9 +39,9 @@ query {
 }
 ```
 - nif -> String, required;
-- delta -> String, optional (default "D")
-- window_start -> String, optional (default None)
-- window_end -> String, optional (default None)
+- delta -> String, optional (default "D");
+- window_start -> String, optional (default None);
+- window_end -> String, optional (default None).
 
 #### Invoices per category
 ```
@@ -53,8 +53,8 @@ query {
 - delta: String, optional (default "M");
 - is_count: Boolean, optional (default True);
 - category: String, optional (default None);
-- window_start -> String, optional (default None)
-- window_end -> String, optional (default None)
+- window_start -> String, optional (default None);
+- window_end -> String, optional (default None).
 
 #### Invoices per client
 ```
@@ -66,8 +66,8 @@ query {
 - delta: String, optional (default "M");
 - is_count: Boolean, optional (default True);
 - client_nif: String, optional (default None);
-- window_start -> String, optional (default None)
-- window_end -> String, optional (default None)
+- window_start -> String, optional (default None);
+- window_end -> String, optional (default None).
 
 #### Predict invoices
 ```
@@ -78,7 +78,30 @@ query {
 - nif: String, required;
 - time: Int, required;
 - delta: String, optional (default "M");
-- method: String, "simple" or "advanced" (default "simple")
+- method: String, "simple" or "advanced" (default "simple").
+
+#### Categorize invoices
+```
+query {
+    categorize_invoices(invoices: "...")
+}
+```
+- invoices: JSONString, required.
+
+Example for the __invoices__ field (must be converted to a string before sending):
+```
+{
+    "0": {
+     "nif":"1234",
+     "company_seller_name":"Razoes para Adultos",
+     "total_value":130,
+     "doc_emission_date": "2020-12-22"
+    },
+    ...
+}
+```
+The model has an expiration date of __15 days__ before needing to be trained again on the whole data of the user. If this happens during a request, it might take between __5 to 15__ seconds to finish (depending on the machine). After trained, it is stored inside a local BD running on this docker service.
+
 ---
 
 For more info head over to the more technical documentation [here](./doc/schema/index.html).
