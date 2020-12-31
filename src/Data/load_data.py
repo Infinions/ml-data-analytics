@@ -36,7 +36,7 @@ def load_invoices_from_nif_costs(nif):
    dataframe['doc_emission_date'] = pd.to_datetime(dataframe.doc_emission_date)
    dataframe['total_value'] = dataframe['total_value'] / 100   # Due to the way the BD stores it
 
-   dataframe = dataframe.rename(columns={'doc_emission_date': 'date'})
+   dataframe = dataframe.rename(columns={'doc_emission_date': 'dates'})
    return dataframe
 
 #Represents an INCOME
@@ -53,7 +53,7 @@ def load_invoices_from_nif_incomes(nif):
 
    dataframe = psql.read_sql(query, connection)
    dataframe['date'] = pd.to_datetime(dataframe.date) 
-   dataframe.columns = ['total_value','date','description']
+   dataframe.columns = ['total_value','dates','description']
    dataframe['total_value'] = dataframe['total_value'] / 100   # Due to the way the BD stores it
 
    return dataframe
@@ -157,6 +157,9 @@ def fill_gap_dates(data):
    Args:
       data: Dataframe, data to modify.
    """
+   if data.empty:
+      return data
+      
    window_start = data.head(1).index[0][0]
    window_end = data.tail(1).index[0][0]
     
