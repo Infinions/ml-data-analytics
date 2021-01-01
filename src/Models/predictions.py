@@ -12,7 +12,7 @@ def __prepare_data(data):
     Args:
         data: Dataframe, dataset.
     """
-    pr_data = data[['date','total_value']]
+    pr_data = data[['dates','total_value']]
     pr_data.columns = ['ds','y']
     pr_data['ds'] = pd.to_datetime(pr_data['ds'])
 
@@ -134,5 +134,5 @@ def forecast_growth(dataset, time, delta='D', method='simple'):
     # TODO Collect old data and add new data for a more realistic visualization
 
     y_values = y_values[['ds','yhat']]
-    y_values.columns = ['date','total_value']
+    y_values.columns = ['dates','total_value']
     return y_values
