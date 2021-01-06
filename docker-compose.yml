@@ -12,7 +12,15 @@ services:
       DB_PORT: 5432
       DB_PWD: kohpien0Lu5ceheiG6kohchie0eiteeL
       DB_HOST: db
+      DB_ANALYTICS: 'mongodb://analytics_db:27017/'
+      DB_ANALYTICS_HOST: analytics_db
+      DB_ANAKYTICS_PORT: 27017
   
+  analytics_db:
+    image: mongo
+    ports:
+      - "27017:27017"
+    
   db:
     image: postgres
     ports:
