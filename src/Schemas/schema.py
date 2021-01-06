@@ -59,11 +59,7 @@ class RootQuery(ObjectType):
 
     @staticmethod
     def resolve_categorize_invoices(parent, info, invoices):
-<<<<<<< HEAD
         inv_dt = pd.DataFrame.from_dict(invoices['list'], orient='columns')
-=======
-        inv_dt = pd.read_json(json.dumps(invoices), orient='index')
->>>>>>> Recommendation Sytem for categories
         inv_dt = inv_dt.rename(columns={'doc_emission_date': 'date'})
         inv_dt['nif'] = inv_dt.nif.astype(str)
         recommender = RecommendationSystem(inv_dt['nif'][0], db_controller)
@@ -72,11 +68,8 @@ class RootQuery(ObjectType):
             recommender.load_model()
         else:
             data = load_data.load_invoices_from_nif_costs(inv_dt['nif'][0])
-<<<<<<< HEAD
             if data.empty:
                 return []
-=======
->>>>>>> Recommendation Sytem for categories
             recommender.prepare_data(data)
             recommender.train_model()
             recommender.save_model()
