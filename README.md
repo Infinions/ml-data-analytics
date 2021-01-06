@@ -19,6 +19,16 @@ $ deactivate
 ```
 ---
 
+## Important Advices
+
+### Documentation
+
+To generate documentation simply run the following commands with the server on:
+```
+$ npm install -g @2fd/graphdoc # to install the generator
+$ graphdoc -e http://localhost:5000/graphql -o ./doc/schema
+```
+
 ## Routing
 
 To process requests we decided to use a technology named __GraphQL__ using the __graphene__ package for python. With this we can perform fast query answers to this API returning only the data the user requests.
