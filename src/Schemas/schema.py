@@ -2,6 +2,7 @@ from graphene import ObjectType, Schema, Field, List, String, Boolean, JSONStrin
 import pandas as pd
 import time
 import json
+import os
 import Models.statistics as data_manipulation
 import Models.predictions as data_predictors
 import Data.load_data as load_data
@@ -10,8 +11,9 @@ from BD.mongo_controller import MongoController
 
 
 export_type = 'columns'
+mongo_string = os.getenv('DB_ANALYTICS') if os.getenv('DB_ANALYTICS') != None else ""
 
-db_controller = MongoController("")
+db_controller = MongoController(mongo_string)
 
 class RootQuery(ObjectType):
     class Meta:
@@ -56,7 +58,7 @@ class RootQuery(ObjectType):
 
     @staticmethod
     def resolve_categorize_invoices(parent, info, invoices):
-        inv_dt = pd.read_json(json.dumps(invoices), orient='index')
+        inv_dt = pd.DataFrame.from_dict(invoices['list'], orient='columns')
         inv_dt = inv_dt.rename(columns={'doc_emission_date': 'date'})
         inv_dt['nif'] = inv_dt.nif.astype(str)
         recommender = RecommendationSystem(inv_dt['nif'][0], db_controller)
@@ -65,6 +67,8 @@ class RootQuery(ObjectType):
             recommender.load_model()
         else:
             data = load_data.load_invoices_from_nif_costs(inv_dt['nif'][0])
+            if data.empty:
+                return []
             recommender.prepare_data(data)
             recommender.train_model()
             recommender.save_model()

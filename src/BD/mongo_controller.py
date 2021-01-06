@@ -4,7 +4,7 @@ from pymongo import MongoClient
 class MongoController:
 
     def __init__(self, connection_string):
-        self.client = MongoClient()
+        self.client = MongoClient(connection_string)
         self.db = self.client.db.models
 
     def lookup_model(self, id):

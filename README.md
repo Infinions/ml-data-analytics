@@ -91,13 +91,15 @@ query {
 Example for the __invoices__ field (must be converted to a string before sending):
 ```
 {
-    "0": {
-     "nif":"1234",
-     "company_seller_name":"Razoes para Adultos",
-     "total_value":130,
-     "doc_emission_date": "2020-12-22"
-    },
-    ...
+    "list": [
+        {
+        "nif":"1234",
+        "company_seller_name":"Razoes para Adultos",
+        "total_value":130,
+        "doc_emission_date": "2020-12-22"
+        },
+        ...
+    ]
 }
 ```
 The model has an expiration date of __15 days__ before needing to be trained again on the whole data of the user. If this happens during a request, it might take between __5 to 15__ seconds to finish (depending on the machine). After trained, it is stored inside a local BD running on this docker service.
