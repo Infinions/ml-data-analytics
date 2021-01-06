@@ -52,8 +52,13 @@ class RootQuery(ObjectType):
 
         res1 = data_predictors.forecast_growth(data_costs, time, delta, method)
 
+        if res1.empty:
+            dates = []
+        else:
+            dates = res1['dates'].dt.strftime('%Y-%m-%d').tolist()
+
         json_format = {
-            'dates': res1['date'].dt.strftime('%Y-%m-%d').tolist(),
+            'dates': dates,
             'total_value': res1['total_value'].tolist(),
         }        
         return json_format
@@ -66,15 +71,20 @@ class RootQuery(ObjectType):
         data_costs = load_data.load_invoices_from_nif_costs(nif)
 
         res1 = data_manipulation.invoices_per_client_per_delta(data_costs, delta, client_nif, is_count)
-        res1 = load_data.filter_by_date(res1, 'date', window_start, window_end)
+        res1 = load_data.filter_by_date(res1, 'dates', window_start, window_end)
 
-        res1 = res1.set_index(['date','company_seller_name'])
+        res1 = res1.set_index(['dates','company_seller_name'])
         res1 = load_data.fill_gap_dates(res1)
         res1 = res1.reset_index() 
-        res1 = res1.rename(columns={'level_0': 'date'})
+        res1 = res1.rename(columns={'level_0': 'dates'})
+
+        if res1.empty:
+            dates = []
+        else:
+            dates = res1['dates'].dt.strftime('%Y-%m-%d').tolist()
 
         json_format = {
-            'dates': res1['date'].dt.strftime('%Y-%m-%d').unique().tolist(),
+            'dates': dates,
             'companies': {}
         }
 
@@ -91,15 +101,20 @@ class RootQuery(ObjectType):
         data_costs = load_data.load_invoices_from_nif_costs(nif)
 
         res1 = data_manipulation.invoices_per_category_per_delta(data_costs, delta, category, is_count)
-        res1 = load_data.filter_by_date(res1, 'date', window_start, window_end)
+        res1 = load_data.filter_by_date(res1, 'dates', window_start, window_end)
 
-        res1 = res1.set_index(['date','category'])
+        res1 = res1.set_index(['dates','category'])
         res1 = load_data.fill_gap_dates(res1)
         res1 = res1.reset_index() 
-        res1 = res1.rename(columns={'level_0': 'date'})
+        res1 = res1.rename(columns={'level_0': 'dates'})
+
+        if res1.empty:
+            dates = []
+        else:
+            dates = res1['dates'].dt.strftime('%Y-%m-%d').tolist()
 
         json_format = {
-            'dates': res1['date'].dt.strftime('%Y-%m-%d').unique().tolist(),
+            'dates': dates,
             'categories': {}
         }
 
@@ -131,8 +146,13 @@ class RootQuery(ObjectType):
         res1 = load_data.filter_by_date(res1, 'dates', window_start, window_end)
         res2 = load_data.filter_by_date(res2, 'dates', window_start, window_end)
 
+        if res1.empty and res2.empty:
+            dates = []
+        else:
+            dates = res1['dates'].dt.strftime('%Y-%m-%d').tolist()
+
         json_format = {
-            'dates': res1['dates'].dt.strftime('%Y-%m-%d').tolist(),
+            'dates': dates,
             'costs_values': res1['values'].tolist(),
             'gains_values': res2['values'].tolist(),
         }        
