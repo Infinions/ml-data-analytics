@@ -6,7 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    data = dat.load_invoices_from_nif_costs("1234")
+    data = dat.load_all_costs_from_nif("1234")
+    print(data)
     #timedelta = 'D'
 
     
@@ -15,11 +16,11 @@ if __name__ == "__main__":
     #json_data = res.to_json(orient='records')
     #print(json_data)
 
-    nif="1234"
-    delta="D"
+    #nif="1234"
+    #delta="D"
 
-    tmp = pred.forecast_growth(data,15, delta, 'simple')
-    print(tmp)
+    #tmp = pred.forecast_growth(data,15, delta, 'simple')
+    #print(tmp)
 
     #res1 = man.invoices_per_client_per_delta(data, delta, None, True)
     #res1 = res1.set_index(['date','company_seller_name'])

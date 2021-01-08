@@ -48,7 +48,7 @@ class RootQuery(ObjectType):
 
     @staticmethod
     def resolve_predict_future(parent, info, nif, time, delta, method):
-        data_costs = load_data.load_invoices_from_nif_costs(nif)
+        data_costs = load_data.load_all_costs_from_nif(nif)
 
         res1 = data_predictors.forecast_growth(data_costs, time, delta, method)
 
@@ -68,7 +68,7 @@ class RootQuery(ObjectType):
         if client_nif == "":
             client_nif = None
 
-        data_costs = load_data.load_invoices_from_nif_costs(nif)
+        data_costs = load_data.load_all_costs_from_nif(nif)
 
         res1 = data_manipulation.invoices_per_client_per_delta(data_costs, delta, client_nif, is_count)
         res1 = load_data.filter_by_date(res1, 'dates', window_start, window_end)
@@ -98,7 +98,7 @@ class RootQuery(ObjectType):
         if category == "":
             category = None
         
-        data_costs = load_data.load_invoices_from_nif_costs(nif)
+        data_costs = load_data.load_all_costs_from_nif(nif)
 
         res1 = data_manipulation.invoices_per_category_per_delta(data_costs, delta, category, is_count)
         res1 = load_data.filter_by_date(res1, 'dates', window_start, window_end)
@@ -125,7 +125,7 @@ class RootQuery(ObjectType):
 
     @staticmethod
     def resolve_sum_invoices(parent, info, nif, delta, window_start, window_end):
-        data_costs = load_data.load_invoices_from_nif_costs(nif)
+        data_costs = load_data.load_all_costs_from_nif(nif)
         data_earns = load_data.load_invoices_from_nif_incomes(nif)
 
         res1 = data_manipulation.invoices_sum_per_timedelta(data_costs, delta)
