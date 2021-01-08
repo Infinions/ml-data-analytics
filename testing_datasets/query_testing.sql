@@ -16,3 +16,7 @@ left join categories as cat on invoices.category_id=cat.id
 WHERE cn.nif='1234';
 
 
+select companies.nif, cs.date as dates, cs.value as total_value
+from  companies
+inner join costs as cs on companies.id=cs.company_id 
+where companies.nif = '1234';

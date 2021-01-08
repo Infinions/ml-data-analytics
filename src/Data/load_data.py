@@ -17,7 +17,7 @@ connection = pg.connect(dbname=dbname, user=dbuser, password=dbpwd,
                         host=dbHost, port=dbport)
 
 
-#Represents a COST
+#Represents a COST from invoice
 def load_invoices_from_nif_costs(nif):
    """Load invoices from database by nif, by costs
    Args:
@@ -38,6 +38,42 @@ def load_invoices_from_nif_costs(nif):
 
    dataframe = dataframe.rename(columns={'doc_emission_date': 'dates'})
    return dataframe
+
+#Represents a local COST (expense)
+def load_expenses_from_nif(nif):
+   """Load company costs from database by it's nif
+      Args:
+         nif: String, nif of the user.
+   """
+
+   query = "SELECT companies.nif as company_nif, cs.date as dates, cs.value as total_value\
+               FROM  companies\
+            INNER join costs as cs on companies.id=cs.company_id \
+               WHERE companies.nif='"+nif+"'"
+
+   dataframe = psql.read_sql(query, connection)
+   dataframe['total_value'] = dataframe['total_value'] / 100   # Due to the way the BD stores it
+   dataframe['dates'] = pd.to_datetime(dataframe.dates)
+
+   return dataframe
+
+def load_all_costs_from_nif(nif):
+   """Load all company costs from database by it's nif, joining them on a single dataframe
+      Args:
+         nif: String, nif of the user.
+   """
+
+   d1 = load_invoices_from_nif_costs(nif)
+   d1.set_index('dates', inplace=True)
+   d2 = load_expenses_from_nif(nif)
+   d2.set_index('dates', inplace=True)
+
+   final = pd.concat([d1,d2], axis=0)
+   final.sort_index(inplace=True)
+   final.reset_index(inplace=True)
+
+   return final
+
 
 #Represents an INCOME
 def load_invoices_from_nif_incomes(nif):
@@ -87,6 +123,7 @@ def adjust_datasets_length(costs, gains):
       end_date = ed_c
    else:
       end_date = ed_g
+
 
    costs_new = pd.DataFrame(None,
       index=pd.date_range(start_date.values[0], end_date.values[0]),
