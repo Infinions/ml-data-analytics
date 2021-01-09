@@ -1,4 +1,4 @@
-#import Data.load_data as dat
+import Data.load_data as dat
 import Models.statistics as man
 #import Models.predictions as pred
 import pandas as pd
@@ -10,12 +10,9 @@ from BD.MongoController import MongoController
 from Models.RecommendationSystem import RecommendationSystem
 
 if __name__ == "__main__":
-<<<<<<< HEAD
    data = dat.load_all_costs_from_nif("1234")
    print(data)
    #timedelta = 'D'
-=======
->>>>>>> Recommendation Sytem for categories
    #data = dat.load_invoices_from_nif_costs("1234")
    #timedelta = 'D'
 
@@ -28,7 +25,6 @@ if __name__ == "__main__":
    #nif="1234"
    #delta="D"
 
-<<<<<<< HEAD
    #tmp = pred.forecast_growth(data,15, delta, 'simple')
    #print(tmp)
    #nif="1234"
@@ -49,33 +45,10 @@ if __name__ == "__main__":
 
    #for r in tmp_data['company_seller_name'].unique():
    #    vals[r] = tmp_data[tmp_data['company_seller_name'] == r]['total_value'].values
-=======
-   #   tmp = pred.forecast_growth(data,15, delta, 'simple')
-   #  print(tmp)
-
-   #res1 = man.invoices_per_client_per_delta(data, delta, None, True)
-   #res1 = res1.set_index(['date','company_seller_name'])
-   #print(res1)
-   #tmp_data = dat.fill_gap_dates(res1)
-   #print(tmp_data)
-   #tmp_data = tmp_data.reset_index()
-   #tmp_data = tmp_data.rename(columns={'level_0': 'date'})
-
-   #vals = {}
-
-   #for r in tmp_data['company_seller_name'].unique():
-   #    vals[r] = tmp_data[tmp_data['company_seller_name'] == r]['total_value'].values
-
-   #print(vals)
->>>>>>> Recommendation Sytem for categories
 
    #print(vals)
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> Recommendation Sytem for categories
    #cats = tmp_data['company_seller_name'].values.tolist()
    #print(len(cats))
    #vals = tmp_data['total_value'].values.tolist()

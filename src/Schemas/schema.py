@@ -11,7 +11,7 @@ from BD.mongo_controller import MongoController
 
 
 export_type = 'columns'
-mongo_string = os.getenv('DB_ANALYTICS') if os.getenv('DB_ANALYTICS') != None else ""
+mongo_string = os.getenv('DB_ANALYTICS') if os.getenv('DB_ANALYTICS') != None else None
 
 db_controller = MongoController(mongo_string)
 
