@@ -14,7 +14,7 @@ services:
       DB_HOST: db
       DB_ANALYTICS: 'mongodb://analytics_db:27017/'
       DB_ANALYTICS_HOST: analytics_db
-      DB_ANAKYTICS_PORT: 27017
+      DB_ANAlYTICS_PORT: 27017
   
   analytics_db:
     image: mongo
