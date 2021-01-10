@@ -29,14 +29,14 @@ class RecommendationSystem:
 
     def prepare_data(self, dataset):
         dataset['company_seller_name'] = dataset['company_seller_name'].apply(lambda c: c.replace(" ",""))
-        dataset['date'] = pd.to_datetime(dataset['date']).astype(int)/ 10**9
+        dataset['dates'] = pd.to_datetime(dataset['dates']).astype(int)/ 10**9
         
         self.vectorizer = TfidfVectorizer(max_features=1500, min_df=1, max_df=1, stop_words='english')
         X1 = self.vectorizer.fit_transform(dataset['company_seller_name']).toarray()
         
         self.X = pd.DataFrame(X1)
         self.X['value'] = dataset['total_value'].values
-        self.X['date'] = dataset['date'].values 
+        self.X['dates'] = dataset['dates'].values 
         self.Y = dataset['category_id']
 
     def save_model(self):
@@ -73,11 +73,11 @@ class RecommendationSystem:
 
     def __prepare_new_data(self, data):
         data['company_seller_name'] = data['company_seller_name'].apply(lambda c: c.replace(" ",""))
-        data['date'] = pd.to_datetime(data['date']).astype(int)/ 10**9
+        data['dates'] = pd.to_datetime(data['dates']).astype(int)/ 10**9
         x = pd.DataFrame(self.vectorizer.transform(data['company_seller_name']).toarray())
 
         x['value'] = data['total_value'].values
-        x['date'] = data['date'].values
+        x['dates'] = data['dates'].values
 
         return x
 

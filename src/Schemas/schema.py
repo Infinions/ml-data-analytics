@@ -60,7 +60,7 @@ class RootQuery(ObjectType):
     @staticmethod
     def resolve_categorize_invoices(parent, info, invoices):
         inv_dt = pd.DataFrame.from_dict(invoices['list'], orient='columns')
-        inv_dt = inv_dt.rename(columns={'doc_emission_date': 'date'})
+        inv_dt = inv_dt.rename(columns={'doc_emission_date': 'dates'})
         inv_dt['nif'] = inv_dt.nif.astype(str)
         recommender = RecommendationSystem(inv_dt['nif'][0], db_controller)
 
