@@ -42,7 +42,7 @@ and access the graphql interface on http://localhost:5600/graphql .
 
 ### Available Querys
 
-#### Sum of invoices 
+#### Sum of invoices
 ```
 query {
     sum_invoices(nif: "...", ...)
@@ -93,10 +93,11 @@ query {
 #### Categorize invoices
 ```
 query {
-    categorize_invoices(invoices: "...")
+    categorize_invoices(overwrite: true, invoices: "...")
 }
 ```
 - invoices: JSONString, required.
+- overwrite: Boolean, optional (default False).
 
 Example for the __invoices__ field (must be converted to a string before sending):
 ```

@@ -11,7 +11,11 @@ from BD.mongo_controller import MongoController
 
 
 export_type = 'columns'
-mongo_string = os.getenv('DB_ANALYTICS') if os.getenv('DB_ANALYTICS') != None else None
+
+db_host = os.getenv('DB_ANALYTICS_HOST')
+db_port = os.getenv('DB_ANALYTICS_PORT')
+db_envs = db_host != None and db_port != None
+mongo_string = 'mongodb://{}:{}/'.format(db_host, db_port) if db_envs else None
 
 db_controller = MongoController(mongo_string)
 
@@ -54,20 +58,21 @@ class RootQuery(ObjectType):
     )
     categorize_invoices = JSONString(
         description = "Recommends category for multiple invoices.",
-        invoices    = JSONString(required=True, description="Invoices to be categorized.")
+        invoices    = JSONString(required=True, description="Invoices to be categorized."),
+        overwrite   = Boolean(default_value=False, description="Overwrite ML model from database")
     )
 
     @staticmethod
-    def resolve_categorize_invoices(parent, info, invoices):
+    def resolve_categorize_invoices(parent, info, invoices, overwrite):
         inv_dt = pd.DataFrame.from_dict(invoices['list'], orient='columns')
         inv_dt = inv_dt.rename(columns={'doc_emission_date': 'dates'})
         inv_dt['nif'] = inv_dt.nif.astype(str)
         recommender = RecommendationSystem(inv_dt['nif'][0], db_controller)
 
-        if recommender.check_existing_model():
+        if not overwrite and recommender.check_existing_model():
             recommender.load_model()
         else:
-            data = load_data.load_invoices_from_nif_costs(inv_dt['nif'][0])
+            data = load_data.load_invoices_from_nif_costs(inv_dt['nif'][0]).dropna()
             if data.empty:
                 return []
             recommender.prepare_data(data)
@@ -75,7 +80,7 @@ class RootQuery(ObjectType):
             recommender.save_model()
 
         categories = recommender.recommend_category(inv_dt)
-        
+
         results = {}
         for i in range(len(categories)):
             results[i] = int(categories[i])
@@ -96,7 +101,7 @@ class RootQuery(ObjectType):
         json_format = {
             'dates': dates,
             'total_value': res1['total_value'].tolist(),
-        }        
+        }
         return json_format
 
     @staticmethod
@@ -111,7 +116,7 @@ class RootQuery(ObjectType):
 
         res1 = res1.set_index(['dates','company_seller_name'])
         res1 = load_data.fill_gap_dates(res1)
-        res1 = res1.reset_index() 
+        res1 = res1.reset_index()
         res1 = res1.rename(columns={'level_0': 'dates'})
 
         if res1.empty:
@@ -133,7 +138,7 @@ class RootQuery(ObjectType):
     def resolve_n_invoices_category(parent, info, nif, delta, is_count, category, window_start, window_end):
         if category == "":
             category = None
-        
+
         data_costs = load_data.load_all_costs_from_nif(nif)
 
         res1 = data_manipulation.invoices_per_category_per_delta(data_costs, delta, category, is_count)
@@ -141,7 +146,7 @@ class RootQuery(ObjectType):
 
         res1 = res1.set_index(['dates','category'])
         res1 = load_data.fill_gap_dates(res1)
-        res1 = res1.reset_index() 
+        res1 = res1.reset_index()
         res1 = res1.rename(columns={'level_0': 'dates'})
 
         if res1.empty:
@@ -191,6 +196,6 @@ class RootQuery(ObjectType):
             'dates': dates,
             'costs_values': res1['values'].tolist(),
             'gains_values': res2['values'].tolist(),
-        }        
+        }
         return json_format
 

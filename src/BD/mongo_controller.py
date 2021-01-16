@@ -23,6 +23,6 @@ class MongoController:
         self.db.replace_one(
             {'nif': id},
             data,
-            upsert=True 
+            upsert=True
         )
 

@@ -28,15 +28,15 @@ class RecommendationSystem:
         return True
 
     def prepare_data(self, dataset):
-        dataset['company_seller_name'] = dataset['company_seller_name'].apply(lambda c: c.replace(" ","")).dropna()
+        dataset['company_seller_name'] = dataset['company_seller_name'].apply(lambda c: c.replace(" ",""))
         dataset['dates'] = pd.to_datetime(dataset['dates']).astype(int)/ 10**9
-        
+
         self.vectorizer = TfidfVectorizer(max_features=1500, min_df=1, max_df=1, stop_words='english')  # maybe should be removed?
         X1 = self.vectorizer.fit_transform(dataset['company_seller_name']).toarray()
-        
+
         self.X = pd.DataFrame(X1)
         self.X['value'] = dataset['total_value'].values
-        self.X['dates'] = dataset['dates'].values 
+        self.X['dates'] = dataset['dates'].values
         self.Y = dataset['category_id']
 
     def save_model(self):

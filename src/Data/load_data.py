@@ -3,7 +3,7 @@ import pandas as pd
 import pandas.io.sql as psql
 import numpy as np
 import os
- 
+
 MIN_INVOICES_PER_MONTH = 1    #TODO must be changed according to data
 
 dbname = os.getenv('DB_NAME') if os.getenv('DB_NAME') != None else "infin_dev"
@@ -23,16 +23,20 @@ def load_invoices_from_nif_costs(nif):
    Args:
       nif: String, nif of the user.
    """
-   
-   query = "SELECT invoices.*, cn.nif as company_nif, cn.name as company_name, csn.nif as company_seller_nif, csn.name as company_seller_name, cat.name as category\
-               FROM invoices\
+
+   query = "SELECT\
+               invoices.category_id, invoices.company_seller_id,\
+               invoices.company_id, invoices.doc_emission_date,\
+               invoices.total_value, cn.nif as company_nif,\
+               cn.name as company_name, csn.nif as company_seller_nif,\
+               csn.name as company_seller_name, cat.name as category\
+            FROM invoices\
             INNER JOIN companies as cn ON invoices.company_id=cn.id\
             INNER JOIN companies as csn ON invoices.company_seller_id=csn.id\
             LEFT JOIN categories as cat ON invoices.category_id=cat.id\
-               WHERE cn.nif='"+nif+"'"
+               WHERE cn.nif='" + nif + "'"
 
    dataframe = psql.read_sql(query, connection)
-   dataframe.drop(columns=['doc_hash', 'inserted_at', 'updated_at'], inplace=True)
    dataframe['doc_emission_date'] = pd.to_datetime(dataframe.doc_emission_date)
    dataframe['total_value'] = dataframe['total_value'] / 100   # Due to the way the BD stores it
 
@@ -88,7 +92,7 @@ def load_invoices_from_nif_incomes(nif):
                WHERE cn.nif='"+nif+"'"
 
    dataframe = psql.read_sql(query, connection)
-   dataframe['date'] = pd.to_datetime(dataframe.date) 
+   dataframe['date'] = pd.to_datetime(dataframe.date)
    dataframe.columns = ['total_value','dates','description']
    dataframe['total_value'] = dataframe['total_value'] / 100   # Due to the way the BD stores it
 
@@ -131,7 +135,7 @@ def adjust_datasets_length(costs, gains):
    )
    costs_new.index.name = 'dates'
 
-   gains_new = pd.DataFrame(None, 
+   gains_new = pd.DataFrame(None,
       index=pd.date_range(start_date.values[0], end_date.values[0]),
       columns=['values']
    )
@@ -153,7 +157,7 @@ def clean_missing_data(data, ind, val):
       ind: String, date column name.
       val: String, value column name.
    """
-   
+
    clean_data = pd.DataFrame(data.reset_index().groupby([pd.Grouper(key=ind, freq='D')])[val].sum()).reset_index()
 
    # Set NA to montly data without/low number of invoices (it's best to assume it's missing as opposed to no actual/only some invoices were created)
@@ -165,7 +169,7 @@ def clean_missing_data(data, ind, val):
       clean_data.loc[(clean_data[ind] >= start_m) & (clean_data[ind] <= end_m),val] = None
 
 
-   return clean_data   
+   return clean_data
 
 
 
@@ -182,7 +186,7 @@ def load_and_prepare_data(nif):
 
    final_data = pd.concat([data_costs, data_earns], axis=1)
 
-   final_data = final_data.resample('D').pad()     
+   final_data = final_data.resample('D').pad()
    print(final_data.head())
    final_data = final_data.reset_index()
 
@@ -196,10 +200,10 @@ def fill_gap_dates(data):
    """
    if data.empty:
       return data
-      
+
    window_start = data.head(1).index[0][0]
    window_end = data.tail(1).index[0][0]
-    
+
    idx = pd.date_range(window_start, window_end)
 
    (date_index, category_index) = data.index.levels

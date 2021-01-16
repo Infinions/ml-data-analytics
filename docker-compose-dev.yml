@@ -1,0 +1,18 @@
+version: '3.1'
+
+services:
+  analytics-dev:
+    build: .
+    environment:
+      API_PORT: 5602
+      DB_NAME: infin_dev
+      DB_USER: infin
+      DB_PORT: 5432
+      DB_PWD: infin
+      DB_HOST: localhost
+      DB_ANALYTICS_HOST: localhost
+      DB_ANALYTICS_PORT: 27017
+    ports:
+    - 5602:5602
+    restart: always
+    network_mode: host
