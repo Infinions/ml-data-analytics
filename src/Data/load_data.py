@@ -193,7 +193,7 @@ def load_and_prepare_data(nif):
    return final_data
 '''
 
-def fill_gap_dates(data):
+def fill_gap_dates(data, delta):
    """Fill missing dates between rows.
    Args:
       data: Dataframe, data to modify.
@@ -203,8 +203,8 @@ def fill_gap_dates(data):
 
    window_start = data.head(1).index[0][0]
    window_end = data.tail(1).index[0][0]
-
-   idx = pd.date_range(window_start, window_end)
+    
+   idx = pd.date_range(window_start, window_end, freq=delta)
 
    (date_index, category_index) = data.index.levels
    new_index = pd.MultiIndex.from_product([idx, category_index])

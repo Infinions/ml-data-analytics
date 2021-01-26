@@ -115,8 +115,8 @@ class RootQuery(ObjectType):
         res1 = load_data.filter_by_date(res1, 'dates', window_start, window_end)
 
         res1 = res1.set_index(['dates','company_seller_name'])
-        res1 = load_data.fill_gap_dates(res1)
-        res1 = res1.reset_index()
+        res1 = load_data.fill_gap_dates(res1, delta)
+        res1 = res1.reset_index() 
         res1 = res1.rename(columns={'level_0': 'dates'})
 
         if res1.empty:
@@ -145,8 +145,8 @@ class RootQuery(ObjectType):
         res1 = load_data.filter_by_date(res1, 'dates', window_start, window_end)
 
         res1 = res1.set_index(['dates','category'])
-        res1 = load_data.fill_gap_dates(res1)
-        res1 = res1.reset_index()
+        res1 = load_data.fill_gap_dates(res1, delta)
+        res1 = res1.reset_index() 
         res1 = res1.rename(columns={'level_0': 'dates'})
 
         if res1.empty:

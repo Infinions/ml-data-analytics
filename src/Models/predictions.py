@@ -13,6 +13,7 @@ def __prepare_data(data):
         data: Dataframe, dataset.
     """
     pr_data = data[['dates','total_value']]
+    #pr_data['total_value'] = np.log(pr_data['total_value'])
     pr_data.columns = ['ds','y']
     pr_data['ds'] = pd.to_datetime(pr_data['ds'])
 
@@ -78,18 +79,19 @@ def __forecast_growth_simple(prep_data, time):
 
     country = "PTE"     #TODO_FUTURE add country possibility
 
-    model_add = Prophet(yearly_seasonality=True, seasonality_mode='additive', weekly_seasonality=True)
-    model_add.add_country_holidays(country)           
-    model_mul = Prophet(yearly_seasonality=True, seasonality_mode='multiplicative', weekly_seasonality=True)
-    model_mul.add_country_holidays(country) 
+    #model_add = Prophet(yearly_seasonality=True, seasonality_mode='additive', weekly_seasonality=True)
+    #model_add.add_country_holidays(country)           
+    #model_mul = Prophet(yearly_seasonality=True, seasonality_mode='multiplicative', weekly_seasonality=True)
+    #model_mul.add_country_holidays(country) 
 
-    rms1 = __evaluate_model(model_add, prep_data)
-    rms2 = __evaluate_model(model_mul, prep_data)
-
-    if rms1 > rms2:
-        best = Prophet(yearly_seasonality=True, seasonality_mode='multiplicative')
-    else:
-        best = Prophet(yearly_seasonality=True, seasonality_mode='additive')
+    #rms1 = __evaluate_model(model_add, prep_data)
+    #rms2 = __evaluate_model(model_mul, prep_data)
+    #
+    #if rms1 > rms2:
+    #    best = Prophet(yearly_seasonality=True, seasonality_mode='multiplicative', weekly_seasonality=True)
+    #else:
+    
+    best = Prophet(yearly_seasonality=True, seasonality_mode='additive', weekly_seasonality=False, daily_seasonality=False)
     best.add_country_holidays(country)
     best.fit(prep_data)
 
@@ -125,14 +127,16 @@ def forecast_growth(dataset, time, delta='D', method='simple'):
     else:
         _, forecast = __forecast_growth_simple(prep_data, time)
     
+
     y_values = forecast[['ds','yhat_lower','yhat','yhat_upper']]
+    y_values = y_values.tail(time)
 
     #If it not daily data
     if delta != 'D':
         y_values = pd.DataFrame(y_values.groupby([pd.Grouper(key='ds', freq=delta)])['yhat_lower','yhat','yhat_upper'].sum()).reset_index()
 
-    # TODO Collect old data and add new data for a more realistic visualization
-
     y_values = y_values[['ds','yhat']]
+    y_values.loc[y_values['yhat'] < 0,'yhat'] = 0
+    #y_values['yhat'] = np.exp(y_values['yhat'])
     y_values.columns = ['dates','total_value']
     return y_values
